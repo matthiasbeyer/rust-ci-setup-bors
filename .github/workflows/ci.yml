@@ -82,6 +82,18 @@ jobs:
       - name: cargo-clippy
         run: cargo clippy --all --all-targets --all-features -- -D warnings
 
+  nix-check:
+    name: nix-check
+    runs-on: ubuntu-latest
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v20
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      #- uses: cachix/cachix-action@v12
+      #  with:
+      #    name: REPLACEME
+      #    authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: nix flake check
 
   # We need some "accummulation" job here because bors fails (timeouts) to
   # listen on matrix builds.
@@ -90,6 +102,7 @@ jobs:
     name: CI
     if: ${{ success() }}
     needs:
+      - nix-check
       - check
       - clippy
       - fmt
